@@ -59,6 +59,7 @@
     "updtr": "^2.0.0"
   },
   "dependencies": {
-    "prop-types": "^15.5.10"
+    "prop-types": "^15.5.10",
+    "react-native-datepicker": "1.7.2"
   }
 }

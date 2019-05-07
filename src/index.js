@@ -15,6 +15,7 @@ import {
   Platform,
   ActivityIndicator
 } from 'react-native'
+import DatePicker from 'react-native-datepicker';
 
 /**
  * Default styles
@@ -126,6 +127,10 @@ export default class extends Component {
     automaticallyAdjustContentInsets: PropTypes.bool,
     showsPagination: PropTypes.bool,
     showsButtons: PropTypes.bool,
+    showDateButton: PropTypes.bool,
+    dateMode: PropTypes.string,
+    onDateChange: PropTypes.func,
+    dateFormat: PropTypes.string,
     disableNextButton: PropTypes.bool,
     loadMinimal: PropTypes.bool,
     loadMinimalSize: PropTypes.number,
@@ -162,6 +167,10 @@ export default class extends Component {
     automaticallyAdjustContentInsets: false,
     showsPagination: true,
     showsButtons: false,
+    showDateButton: false,
+    dateMode: 'date',
+    onDateChange: () => null,
+    dateFormat: 'dd/MM/yyyy',
     disableNextButton: false,
     loop: true,
     loadMinimal: false,
@@ -521,7 +530,7 @@ export default class extends Component {
    * @return {object} react-dom
    */
   renderPagination = () => {
-     // By default, dots only show when `total` >= 2
+    // By default, dots only show when `total` >= 2
     if (this.state.total <= 1) return null
 
     let dots = []
@@ -554,9 +563,9 @@ export default class extends Component {
 
     return (
       <View pointerEvents='none' style={[styles['pagination_' + this.state.dir], this.props.paginationStyle]}>
-        {dots}
-      </View>
-    )
+    {dots}
+  </View>
+  )
   }
 
   renderTitle = () => {
@@ -564,9 +573,9 @@ export default class extends Component {
     const title = child && child.props && child.props.title
     return title
       ? (<View style={styles.title}>
-        {this.props.children[this.state.index].props.title}
-      </View>)
-      : null
+    {this.props.children[this.state.index].props.title}
+  </View>)
+  : null
   }
 
   renderNextButton = () => {
@@ -579,14 +588,14 @@ export default class extends Component {
 
     return (
       <TouchableOpacity
-        onPress={() => button !== null && this.scrollBy(1)}
-        disabled={this.props.disableNextButton}
-      >
-        <View>
-          {button}
-        </View>
-      </TouchableOpacity>
-    )
+    onPress={() => button !== null && this.scrollBy(1)}
+    disabled={this.props.disableNextButton}
+  >
+  <View>
+    {button}
+    </View>
+    </TouchableOpacity>
+  )
   }
 
   renderPrevButton = () => {
@@ -598,23 +607,60 @@ export default class extends Component {
 
     return (
       <TouchableOpacity onPress={() => button !== null && this.scrollBy(-1)}>
-        <View>
-          {button}
-        </View>
-      </TouchableOpacity>
-    )
+  <View>
+    {button}
+    </View>
+    </TouchableOpacity>
+  )
   }
+
+  renderDateButton = () => {
+    return (
+      <DatePicker
+    style={this.props.dateMode === 'date' ? {width: 150} : {width: 210}}
+    date={this.props.date} //initial date from props
+    mode={this.props.dateMode} //The enum of date, datetime and time
+    placeholder="Select date"
+    format={this.props.dateFormat}
+    minDate="01-01-2016"
+    maxDate="01-01-2119"
+    confirmBtnText="Confirm"
+    cancelBtnText="Cancel"
+    showIcon={true}
+    customStyles={{
+      dateTouchBody: {
+        //borderRadius:5,
+        //borderWidth: .5,
+        //borderColor: '#ccc'
+      },
+      dateIcon: {
+        position: 'absolute',
+          left: 0,
+          top: 4,
+          marginLeft: 0,
+          paddingRight: 5
+      },
+      dateInput: {
+        marginLeft: 0,
+          borderWidth: 0
+      }
+    }}
+    onDateChange={this.props.onDateChange}
+    />
+  )
+  };
 
   renderButtons = () => {
     return (
       <View pointerEvents='box-none' style={[styles.buttonWrapper, {
-        width: this.state.width,
+      width: this.state.width,
         height: this.state.height
-      }, this.props.buttonWrapperStyle]}>
-        {this.renderPrevButton()}
-        {this.renderNextButton()}
-      </View>
-    )
+    }, this.props.buttonWrapperStyle]}>
+    {this.renderPrevButton()}
+    {this.props.showDateButton && this.renderDateButton()}
+    {this.renderNextButton()}
+  </View>
+  )
   }
 
   refScrollView = view => {
@@ -636,29 +682,29 @@ export default class extends Component {
     if (Platform.OS === 'ios') {
       return (
         <ScrollView ref={this.refScrollView}
-          {...this.props}
-          {...this.scrollViewPropOverrides()}
-          contentContainerStyle={[styles.wrapperIOS, this.props.style]}
-          contentOffset={this.state.offset}
-          onScrollBeginDrag={this.onScrollBegin}
-          onMomentumScrollEnd={this.onScrollEnd}
-          onScrollEndDrag={this.onScrollEndDrag}
-          style={this.props.scrollViewStyle}>
-          {pages}
-        </ScrollView>
-       )
+      {...this.props}
+      {...this.scrollViewPropOverrides()}
+      contentContainerStyle={[styles.wrapperIOS, this.props.style]}
+      contentOffset={this.state.offset}
+      onScrollBeginDrag={this.onScrollBegin}
+      onMomentumScrollEnd={this.onScrollEnd}
+      onScrollEndDrag={this.onScrollEndDrag}
+      style={this.props.scrollViewStyle}>
+      {pages}
+    </ScrollView>
+    )
     }
     return (
       <ViewPagerAndroid ref={this.refScrollView}
-        {...this.props}
-        initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
-        onPageScrollStateChanged={this.onPageScrollStateChanged}
-        onPageSelected={this.onScrollEnd}
-        key={pages.length}
-        style={[styles.wrapperAndroid, this.props.style]}>
-        {pages}
-      </ViewPagerAndroid>
-    )
+    {...this.props}
+    initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
+    onPageScrollStateChanged={this.onPageScrollStateChanged}
+    onPageSelected={this.onScrollEnd}
+    key={pages.length}
+    style={[styles.wrapperAndroid, this.props.style]}>
+    {pages}
+  </ViewPagerAndroid>
+  )
   }
 
   /**
@@ -683,7 +729,12 @@ export default class extends Component {
       loadMinimalLoader,
       renderPagination,
       showsButtons,
+      showDateButton,
       showsPagination,
+      date,
+      onDateChange,
+      dateMode,
+      dateFormat
     } = this.props;
     // let dir = state.dir
     // let key = 0
@@ -716,9 +767,9 @@ export default class extends Component {
           } else {
             return (
               <View style={pageStyleLoading} key={i}>
-                {loadMinimalLoader ? loadMinimalLoader : <ActivityIndicator />}
-              </View>
-            )
+              {loadMinimalLoader ? loadMinimalLoader : <ActivityIndicator />}
+          </View>
+          )
           }
         } else {
           return <View style={pageStyle} key={i}>{children[page]}</View>
@@ -730,13 +781,13 @@ export default class extends Component {
 
     return (
       <View style={[styles.container, containerStyle]} onLayout={this.onLayout}>
-        {this.renderScrollView(pages)}
-        {showsPagination && (renderPagination
-          ? renderPagination(index, total, this)
-          : this.renderPagination())}
-        {this.renderTitle()}
-        {showsButtons && this.renderButtons()}
-      </View>
-    )
+    {this.renderScrollView(pages)}
+    {showsPagination && (renderPagination
+      ? renderPagination(index, total, this)
+      : this.renderPagination())}
+    {this.renderTitle()}
+    {showsButtons && this.renderButtons()}
+  </View>
+  )
   }
 }
